@@ -127,6 +127,105 @@ const renderOperationInputs = () => {
     setAnimationSteps(steps);
     setCurrentStep(0);
   };
+
+  const handleUpdate = () => {
+    const index = parseInt(inputs.index);
+    const value = inputs.value;
+    const newArray = [...array];
+    const steps = [];
+  
+    if (index < 0 || index >= newArray.length) {
+      setCurrentCode('Error: Index out of bounds');
+      return;
+    }
+  
+    // Update code: Start update operation
+    setCurrentCode(`
+      // Start Update Operation
+      let newArray = [...array];
+      let index = ${index};
+      let value = ${value};
+    `);
+  
+    // Step 1: Highlight the element to be updated
+    steps.push({
+      array: [...newArray],
+      highlighted: [index],
+    });
+  
+    // Step 2: Update the value
+    newArray[index] = value;
+    steps.push({
+      array: [...newArray],
+      highlighted: [index],
+    });
+  
+    // Final code update for updating the element
+    setCurrentCode((prevCode) => prevCode + `
+      newArray[${index}] = ${value};
+      // End of update operation
+    `);
+  
+    setAnimationSteps(steps);
+    setCurrentStep(0);
+  };
+  
+
+  const handleRemove = () => {
+    const index = parseInt(inputs.index);
+    const newArray = [...array];
+    const steps = [];
+  
+    if (index < 0 || index >= newArray.length) {
+      setCurrentCode('Error: Index out of bounds');
+      return;
+    }
+  
+    // Update code: Start remove operation
+    setCurrentCode(`
+      // Start Remove Operation
+      let newArray = [...array];
+      let index = ${index};
+    `);
+  
+    // Step 1: Highlight the element to be removed
+    steps.push({
+      array: [...newArray],
+      highlighted: [index],
+    });
+  
+    // Step 2: Shift elements to the left
+    for (let i = index; i < newArray.length - 1; i++) {
+      newArray[i] = newArray[i + 1];
+      steps.push({
+        array: [...newArray],
+        highlighted: [i, i + 1],
+      });
+  
+      // Update code: Shift elements
+      setCurrentCode((prevCode) => prevCode + `
+        newArray[${i}] = newArray[${i + 1}];
+      `);
+    }
+  
+    // Step 3: Remove the last element (now duplicate)
+    newArray.pop();
+    steps.push({
+      array: [...newArray],
+      highlighted: [],
+    });
+  
+    // Final code update for removing
+    setCurrentCode((prevCode) => prevCode + `
+      newArray.pop();
+      // End of remove operation
+    `);
+  
+    setAnimationSteps(steps);
+    setCurrentStep(0);
+  };
+  
+  
   
   
 
@@ -152,12 +251,17 @@ const renderOperationInputs = () => {
       case 'Insert':
         handleInsert();
         break;
-      // Add cases for other operations
+      case 'Remove':
+        handleRemove();
+        break;
+      case 'Update':
+        handleUpdate();
+        break;
       default:
         break;
     }
   };
-
+  
   return (
     <div className="App">
       <div className="left-panel">
@@ -171,10 +275,10 @@ const renderOperationInputs = () => {
         <Visualization array={array} highlightedIndices={highlightedIndices} />
       </div>
 
-      <div className="code-display">
+      {/* <div className="code-display">
         <h3>Current Operation Code</h3>
         <pre>{currentCode}</pre>
-      </div>
+      </div> */}
     </div>
   );
 }
