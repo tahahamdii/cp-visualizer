@@ -10,6 +10,7 @@ function App() {
   
   const [animationSteps, setAnimationSteps] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
+  const [currentCode, setCurrentCode] = useState('');
 
 
   // App.js (partial)
@@ -81,32 +82,52 @@ const renderOperationInputs = () => {
     const newArray = [...array];
     const steps = [];
   
+    // Update code step 1: Start insert operation
+    setCurrentCode(`
+      // Start Insert Operation
+      let newArray = [...array];
+      let value = ${value};
+      let index = ${index};
+    `);
+  
     // Step 1: Highlight the insertion index
     steps.push({
       array: [...newArray],
       highlighted: [index],
     });
   
-    // Step 2: Shift elements to the right
+    // Step 2: Shift elements to the right and update code
     for (let i = newArray.length; i > index; i--) {
       newArray[i] = newArray[i - 1];
       steps.push({
         array: [...newArray],
         highlighted: [i - 1, i],
       });
+  
+      // Update code step 2: Shift elements
+      setCurrentCode((prevCode) => prevCode + `
+        newArray[${i}] = newArray[${i - 1}];
+      `);
     }
   
-    // Step 3: Insert the new value
+    // Step 3: Insert the new value and update code
     newArray[index] = value;
     steps.push({
       array: [...newArray],
       highlighted: [index],
     });
   
+    // Final code update for insertion
+    setCurrentCode((prevCode) => prevCode + `
+      newArray[${index}] = ${value};
+      // End of insert operation
+    `);
+  
     // Set animation steps
     setAnimationSteps(steps);
     setCurrentStep(0);
   };
+  
   
 
   useEffect(() => {
@@ -148,6 +169,11 @@ const renderOperationInputs = () => {
       </div>
       <div className="right-panel">
         <Visualization array={array} highlightedIndices={highlightedIndices} />
+      </div>
+
+      <div className="code-display">
+        <h3>Current Operation Code</h3>
+        <pre>{currentCode}</pre>
       </div>
     </div>
   );
